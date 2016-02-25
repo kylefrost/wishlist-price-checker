@@ -7,7 +7,6 @@ from operator import itemgetter
 import config
 import MySQLdb
 
-wish_list_items = []
 
 def scrape_wish_list_items(list_id):
     """ Populate wish_list_items with data from wishlist """
@@ -15,17 +14,21 @@ def scrape_wish_list_items(list_id):
 
     wish = Wishlist(list_id)
     item_ids = wish.get_list_items()
+
+    wishlist_items = []
+
     api = API(locale='us')
     for item_id in item_ids:
         try:
             result = api.item_lookup(item_id, ResponseGroup="Large")
             for item in result.Items.Item:
                 itm = { "title": item.ItemAttributes.Title, "price": item.Offers.Offer.OfferListing.Price.FormattedPrice, "amazonid": item.ASIN }
-                wish_list_items.append(itm)
+                wishlist_items.append(itm)
         except:
             print "!!! Failed getting " + item_id
 
     print "Completed scraping."
+    return wishlist_items
 
 
 def populate(itms):
@@ -220,16 +223,17 @@ def inform_different(diff):
         update_items(diff_info)
     
     if not is_empty(inc_diff_info):
-        print "No price decreases, only increases."
+        print "Updating price increases."
         update_items(inc_diff_info)
 
     if is_empty(diff_info) and is_empty(inc_diff_info):
         print "No price changes found. This should really ever happen."
 
 def main():
-    scrape_wish_list_items(config.info.LISTID)
-    sorted_wish_list_items = sorted(wish_list_items, key=itemgetter("amazonid"))
-    wish_list_items = sorted_wish_list_items
+    wishlist_items = scrape_wish_list_items(config.info.LISTID)
+    wishlist_items = sorted(wishlist_items, key=itemgetter("amazonid"))
+
+    print wishlist_items
 
     def get_data():
         db = MySQLdb.connect(config.database.HOST, config.database.USER, config.database.PASSWD, config.database.DB)
@@ -243,12 +247,14 @@ def main():
 
         return data
 
+    print format_data(get_data())
+
     if is_empty(get_data()):
-        populate(wish_list_items)
+        populate(wishlist_items)
     else:
-        check_new(wish_list_items, format_data(get_data()))
-        check_delete(wish_list_items, format_data(get_data()))
-        different = compare(wish_list_items, format_data(get_data()))
+        check_new(wishlist_items, format_data(get_data()))
+        check_delete(wishlist_items, format_data(get_data()))
+        different = compare(wishlist_items, format_data(get_data()))
         if is_empty(different):
             # Nothing is different, don't do anything
             print "No changes found."
