@@ -2,13 +2,15 @@ import smtplib
 import config
 from email.MIMEMultipart import MIMEMultipart
 from email.MIMEText import MIMEText
+from email.header import Header
+from email.utils import formataddr
  
 
 def send_diff_update(differences):
     fromaddr = config.email.FROM
     toaddr = config.email.TO
     msg = MIMEMultipart()
-    msg['From'] = fromaddr
+    msg['From'] = formataddr((str(Header(config.email.FROMNAME, "utf-8")), fromaddr))
     msg['To'] = toaddr
     msg['Subject'] = "You have a wishlist price change."
      
