@@ -233,8 +233,6 @@ def main():
     wishlist_items = scrape_wish_list_items(config.info.LISTID)
     wishlist_items = sorted(wishlist_items, key=itemgetter("amazonid"))
 
-    print wishlist_items
-
     def get_data():
         db = MySQLdb.connect(config.database.HOST, config.database.USER, config.database.PASSWD, config.database.DB)
         cursor = db.cursor()
@@ -246,8 +244,6 @@ def main():
         db.close()
 
         return data
-
-    print format_data(get_data())
 
     if is_empty(get_data()):
         populate(wishlist_items)
