@@ -15,7 +15,7 @@ def send_diff_update(differences):
     body = "<h2>Hey " + config.info.NAME + ".</h2><h3>Item(s) on your Amazon Wishlist had a price drop!</h3><ul>"
     
     for difference in differences:
-        body += "<li><a href=\"http://amazon.com/dp/" + difference[1] + "\" target=\"_blank\">" + difference[0] + "</a>. Changed -$" + difference[2] + "</li>"
+        body += "<li><a href=\"http://amazon.com/dp/" + difference[1] + "\" target=\"_blank\">" + difference[0] + "</a>. Changed -$" + difference[2] + " to " + difference[3] + ".</li>"
       
     body += "</ul>"
     
